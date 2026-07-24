@@ -1,0 +1,3 @@
+interface:
+  display_name: "ACX City Integrations"
+  short_description: "Govern ACX City APIs, webhooks, auth, storage, and deployments"

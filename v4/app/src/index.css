@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 258 33% 3%;
+    --foreground: 260 33% 97%;
+    --card: 258 45% 9%;
+    --card-foreground: 260 33% 97%;
+    --popover: 258 45% 9%;
+    --popover-foreground: 260 33% 97%;
+    --primary: 252 100% 68%;
+    --primary-foreground: 258 33% 3%;
+    --secondary: 256 30% 14%;
+    --secondary-foreground: 260 33% 97%;
+    --muted: 256 30% 14%;
+    --muted-foreground: 255 15% 68%;
+    --accent: 256 30% 16%;
+    --accent-foreground: 260 33% 97%;
+    --destructive: 340 100% 62%;
+    --destructive-foreground: 260 33% 97%;
+    --border: 262 38% 16%;
+    --input: 262 38% 16%;
+    --ring: 252 100% 68%;
+    --radius: 0.625rem;
+    --sidebar-background: 258 45% 6%;
+    --sidebar-foreground: 260 20% 92%;
+    --sidebar-primary: 252 100% 68%;
+    --sidebar-primary-foreground: 258 33% 3%;
+    --sidebar-accent: 256 30% 16%;
+    --sidebar-accent-foreground: 260 33% 97%;
+    --sidebar-border: 262 38% 16%;
+    --sidebar-ring: 252 100% 68%;
+  }
+
+  html {
+    @apply bg-void;
+  }
+
+  body {
+    @apply bg-void text-ghost font-sans antialiased overflow-x-hidden;
+  }
+
+  ::selection {
+    background: rgba(124, 92, 255, 0.35);
+    color: #f5f2fb;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #241a38 transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: #241a38;
+    border-radius: 999px;
+  }
+
+  /* Custom cursor active: hide native cursor on precise pointers only */
+  @media (pointer: fine) {
+    body.cursor-custom,
+    body.cursor-custom * {
+      cursor: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* aurora gradient text (max 4 words per headline — design.md §3) */
+  .text-aurora {
+    background-image: linear-gradient(120deg, #7c5cff 0%, #b14bff 32%, #ff3d8a 68%, #ffb224 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .bg-aurora {
+    background-image: linear-gradient(120deg, #7c5cff 0%, #b14bff 32%, #ff3d8a 68%, #ffb224 100%);
+  }
+  .bg-spectrum {
+    background-image: linear-gradient(to top, #2ee6d6 0%, #7c5cff 55%, #ff3d8a 100%);
+  }
+  .deep-field {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 30% 15%, rgba(124, 92, 255, 0.22), transparent 60%),
+      radial-gradient(ellipse 70% 55% at 75% 85%, rgba(46, 230, 214, 0.12), transparent 60%);
+  }
+  .glass {
+    background: rgba(19, 11, 33, 0.65);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .glass-sheen {
+    position: relative;
+  }
+  .glass-sheen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.015) 40%);
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Pulse Bar fake 3:42 progress hairline (transform-only) */
+@keyframes pb-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.pb-progress {
+  animation: pb-progress 222s linear infinite;
+}
+
+/* Traveling aurora segment on WaveformDivider (pathLength normalized to 100) */
+@keyframes wf-travel {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+.wf-travel {
+  animation: wf-travel 7s linear infinite;
+}
+
+/* Pillars §3 mini-visuals */
+@keyframes chip-cycle {
+  0%,
+  22% {
+    opacity: 1;
+    border-color: rgba(124, 92, 255, 0.7);
+    color: #f5f2fb;
+  }
+  27%,
+  100% {
+    opacity: 0.45;
+    border-color: #241a38;
+    color: #a79fbe;
+  }
+}
+.chip-cycle {
+  animation: chip-cycle 4.8s linear infinite;
+}
+
+@keyframes ekg-draw {
+  from {
+    stroke-dashoffset: 480;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.ekg-draw {
+  stroke-dasharray: 240;
+  animation: ekg-draw 2.4s linear infinite;
+}

@@ -1,0 +1,7 @@
+=== run v7 2026-07-21T14:57:33+08:00 ===
+PASS audio(23)
+FAIL tracks(2)
+PASS ledger
+PASS upload
+PASS history
+v7 exit=1

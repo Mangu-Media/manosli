@@ -1,0 +1,2813 @@
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+
+// ─────────────────────────────────────────────
+
+// DATA LAYER — Every track, album, artist, playlist
+
+// ─────────────────────────────────────────────
+
+const ARTISTS = [
+
+{ id: "a1", name: "Nora Veil", image: "🎤", genre: "Electronic", followers: "2.4M", bio: "Berlin-based electronic producer blending ambient textures with driving beats.", color: "#8B5CF6" },
+
+{ id: "a2", name: "Ghost Meridian", image: "👻", genre: "Indie", followers: "1.8M", bio: "Ethereal indie project from Portland, weaving folk melodies into shoegaze walls.", color: "#EC4899" },
+
+{ id: "a3", name: "Sable", image: "🎵", genre: "R&B", followers: "5.1M", bio: "Neo-soul vocalist crafting intimate soundscapes that feel like midnight conversations.", color: "#F59E0B" },
+
+{ id: "a4", name: "HEXFORM", image: "⚡", genre: "Techno", followers: "890K", bio: "Industrial techno from Tokyo. Machines talking to machines.", color: "#10B981" },
+
+{ id: "a5", name: "Lumen Choir", image: "✨", genre: "Classical", followers: "620K", bio: "Contemporary classical ensemble reimagining baroque for the digital age.", color: "#6366F1" },
+
+{ id: "a6", name: "Drift Signals", image: "🌊", genre: "Ambient", followers: "1.2M", bio: "Generative ambient compositions inspired by ocean currents and satellite data.", color: "#06B6D4" },
+
+{ id: "a7", name: "Vanta Black", image: "🖤", genre: "Hip-Hop", followers: "3.7M", bio: "Experimental hip-hop from Atlanta. Every beat is a statement.", color: "#EF4444" },
+
+{ id: "a8", name: "Solaris", image: "☀️", genre: "Pop", followers: "8.2M", bio: "Global pop sensation blending Latin rhythms with futuristic production.", color: "#F97316" },
+
+];
+
+const ALBUMS = [
+
+{ id: "al1", title: "Phantom Frequencies", artist: "a1", artistName: "Nora Veil", year: 2026, cover: "🌌", color: "#8B5CF6", tracks: 12 },
+
+{ id: "al2", title: "Soft Collapse", artist: "a2", artistName: "Ghost Meridian", year: 2025, cover: "🍂", color: "#EC4899", tracks: 10 },
+
+{ id: "al3", title: "Velvet Hours", artist: "a3", artistName: "Sable", year: 2026, cover: "🌙", color: "#F59E0B", tracks: 14 },
+
+{ id: "al4", title: "Machine Hymns", artist: "a4", artistName: "HEXFORM", year: 2026, cover: "⚙️", color: "#10B981", tracks: 8 },
+
+{ id: "al5", title: "Glass Cathedral", artist: "a5", artistName: "Lumen Choir", year: 2025, cover: "🏛️", color: "#6366F1", tracks: 6 },
+
+{ id: "al6", title: "Tidal Memory", artist: "a6", artistName: "Drift Signals", year: 2026, cover: "🌊", color: "#06B6D4", tracks: 9 },
+
+{ id: "al7", title: "Obsidian", artist: "a7", artistName: "Vanta Black", year: 2026, cover: "💎", color: "#EF4444", tracks: 16 },
+
+{ id: "al8", title: "Supernova", artist: "a8", artistName: "Solaris", year: 2026, cover: "🔥", color: "#F97316", tracks: 11 },
+
+{ id: "al9", title: "Neon Prayers", artist: "a1", artistName: "Nora Veil", year: 2024, cover: "🙏", color: "#A855F7", tracks: 10 },
+
+{ id: "al10", title: "Echoes of Us", artist: "a2", artistName: "Ghost Meridian", year: 2024, cover: "🪞", color: "#DB2777", tracks: 8 },
+
+];
+
+const TRACKS = [
+
+{ id: "t1", title: "Phantom Signal", artist: "Nora Veil", artistId: "a1", album: "Phantom Frequencies", albumId: "al1", duration: 234, plays: "12.4M" },
+
+{ id: "t2", title: "Deep Resonance", artist: "Nora Veil", artistId: "a1", album: "Phantom Frequencies", albumId: "al1", duration: 198, plays: "8.7M" },
+
+{ id: "t3", title: "Dissolve", artist: "Ghost Meridian", artistId: "a2", album: "Soft Collapse", albumId: "al2", duration: 267, plays: "6.2M" },
+
+{ id: "t4", title: "Paper Walls", artist: "Ghost Meridian", artistId: "a2", album: "Soft Collapse", albumId: "al2", duration: 312, plays: "4.1M" },
+
+{ id: "t5", title: "Midnight Silk", artist: "Sable", artistId: "a3", album: "Velvet Hours", albumId: "al3", duration: 245, plays: "18.9M" },
+
+{ id: "t6", title: "Golden Skin", artist: "Sable", artistId: "a3", album: "Velvet Hours", albumId: "al3", duration: 201, plays: "15.3M" },
+
+{ id: "t7", title: "Circuit Prayer", artist: "HEXFORM", artistId: "a4", album: "Machine Hymns", albumId: "al4", duration: 378, plays: "3.8M" },
+
+{ id: "t8", title: "Rust Protocol", artist: "HEXFORM", artistId: "a4", album: "Machine Hymns", albumId: "al4", duration: 421, plays: "2.9M" },
+
+{ id: "t9", title: "Stained Light", artist: "Lumen Choir", artistId: "a5", album: "Glass Cathedral", albumId: "al5", duration: 534, plays: "1.4M" },
+
+{ id: "t10", title: "Tidal Pull", artist: "Drift Signals", artistId: "a6", album: "Tidal Memory", albumId: "al6", duration: 487, plays: "2.1M" },
+
+{ id: "t11", title: "Black Diamond", artist: "Vanta Black", artistId: "a7", album: "Obsidian", albumId: "al7", duration: 215, plays: "24.6M" },
+
+{ id: "t12", title: "Crown Heavy", artist: "Vanta Black", artistId: "a7", album: "Obsidian", albumId: "al7", duration: 189, plays: "19.2M" },
+
+{ id: "t13", title: "Solar Flare", artist: "Solaris", artistId: "a8", album: "Supernova", albumId: "al8", duration: 203, plays: "42.1M" },
+
+{ id: "t14", title: "Gravity Kiss", artist: "Solaris", artistId: "a8", album: "Supernova", albumId: "al8", duration: 227, plays: "31.8M" },
+
+{ id: "t15", title: "Neon Haze", artist: "Nora Veil", artistId: "a1", album: "Neon Prayers", albumId: "al9", duration: 256, plays: "9.3M" },
+
+{ id: "t16", title: "Echo Chamber", artist: "Ghost Meridian", artistId: "a2", album: "Echoes of Us", albumId: "al10", duration: 289, plays: "5.6M" },
+
+{ id: "t17", title: "Afterglow", artist: "Sable", artistId: "a3", album: "Velvet Hours", albumId: "al3", duration: 276, plays: "11.7M" },
+
+{ id: "t18", title: "Void Walker", artist: "HEXFORM", artistId: "a4", album: "Machine Hymns", albumId: "al4", duration: 345, plays: "4.5M" },
+
+{ id: "t19", title: "Cathedral Rain", artist: "Lumen Choir", artistId: "a5", album: "Glass Cathedral", albumId: "al5", duration: 612, plays: "980K" },
+
+{ id: "t20", title: "Deep Current", artist: "Drift Signals", artistId: "a6", album: "Tidal Memory", albumId: "al6", duration: 398, plays: "1.7M" },
+
+{ id: "t21", title: "Obsidian Throne", artist: "Vanta Black", artistId: "a7", album: "Obsidian", albumId: "al7", duration: 243, plays: "16.4M" },
+
+{ id: "t22", title: "Starborn", artist: "Solaris", artistId: "a8", album: "Supernova", albumId: "al8", duration: 194, plays: "28.3M" },
+
+{ id: "t23", title: "Velvet Abyss", artist: "Sable", artistId: "a3", album: "Velvet Hours", albumId: "al3", duration: 318, plays: "7.8M" },
+
+{ id: "t24", title: "Static Bloom", artist: "Nora Veil", artistId: "a1", album: "Phantom Frequencies", albumId: "al1", duration: 221, plays: "6.1M" },
+
+];
+
+const GENRES = [
+
+{ id: "g1", name: "Electronic", color: "#8B5CF6", icon: "⚡" },
+
+{ id: "g2", name: "Indie", color: "#EC4899", icon: "🎸" },
+
+{ id: "g3", name: "R&B", color: "#F59E0B", icon: "🎤" },
+
+{ id: "g4", name: "Techno", color: "#10B981", icon: "🔊" },
+
+{ id: "g5", name: "Classical", color: "#6366F1", icon: "🎻" },
+
+{ id: "g6", name: "Ambient", color: "#06B6D4", icon: "🌊" },
+
+{ id: "g7", name: "Hip-Hop", color: "#EF4444", icon: "🎧" },
+
+{ id: "g8", name: "Pop", color: "#F97316", icon: "🌟" },
+
+{ id: "g9", name: "Jazz", color: "#84CC16", icon: "🎷" },
+
+{ id: "g10", name: "Metal", color: "#78716C", icon: "🤘" },
+
+];
+
+const PLAYLISTS_INIT = [
+
+{ id: "p1", name: "Late Night Drive", description: "Moody beats for empty highways", cover: "🛣️", color: "#8B5CF6", tracks: ["t1", "t5", "t10", "t15", "t3"] },
+
+{ id: "p2", name: "Morning Energy", description: "Wake up and move", cover: "☀️", color: "#F59E0B", tracks: ["t13", "t11", "t22", "t14", "t6"] },
+
+{ id: "p3", name: "Deep Focus", description: "Zero distractions", cover: "🧠", color: "#06B6D4", tracks: ["t9", "t10", "t19", "t20", "t2"] },
+
+{ id: "p4", name: "Heavy Rotation", description: "Can't stop playing these", cover: "🔄", color: "#EF4444", tracks: ["t11", "t13", "t5", "t1", "t7", "t14"] },
+
+];
+
+// ─────────────────────────────────────────────
+
+// UTILITIES
+
+// ─────────────────────────────────────────────
+
+const fmt = (s) => {
+
+const m = Math.floor(s / 60);
+
+const sec = s % 60;
+
+return `${m}:${sec.toString().padStart(2, "0")}`;
+
+};
+
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+// ─────────────────────────────────────────────
+
+// ICONS — hand-crafted SVG icons
+
+// ─────────────────────────────────────────────
+
+const Icon = ({ name, size = 20, className = "" }) => {
+
+const s = { width: size, height: size, fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" };
+
+const icons = {
+
+home: <svg {...s} viewBox="0 0 24 24" className={className}><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
+
+search: <svg {...s} viewBox="0 0 24 24" className={className}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>,
+
+library: <svg {...s} viewBox="0 0 24 24" className={className}><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M4 4h16v16H6.5A2.5 2.5 0 014 17.5V4z"/></svg>,
+
+playlist: <svg {...s} viewBox="0 0 24 24" className={className}><path d="M11 5H6M14 8H6M8 11H6"/><circle cx="17" cy="14" r="4"/><path d="M17 10v4"/></svg>,
+
+play: <svg {...s} viewBox="0 0 24 24" className={className} style={{...s, fill: "currentColor"}}><polygon points="5,3 19,12 5,21"/></svg>,
+
+pause: <svg {...s} viewBox="0 0 24 24" className={className} style={{...s, fill: "currentColor"}}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>,
+
+skipFwd: <svg {...s} viewBox="0 0 24 24" className={className}><polygon points="5,4 15,12 5,20" fill="currentColor"/><line x1="19" y1="5" x2="19" y2="19"/></svg>,
+
+skipBack: <svg {...s} viewBox="0 0 24 24" className={className}><polygon points="19,20 9,12 19,4" fill="currentColor"/><line x1="5" y1="5" x2="5" y2="19"/></svg>,
+
+shuffle: <svg {...s} viewBox="0 0 24 24" className={className}><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>,
+
+repeat: <svg {...s} viewBox="0 0 24 24" className={className}><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>,
+
+heart: <svg {...s} viewBox="0 0 24 24" className={className}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>,
+
+heartFill: <svg {...s} viewBox="0 0 24 24" className={className} style={{...s, fill: "currentColor"}}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>,
+
+volume: <svg {...s} viewBox="0 0 24 24" className={className}><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" fill="currentColor"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>,
+
+volumeMute: <svg {...s} viewBox="0 0 24 24" className={className}><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" fill="currentColor"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>,
+
+queue: <svg {...s} viewBox="0 0 24 24" className={className}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+
+plus: <svg {...s} viewBox="0 0 24 24" className={className}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+
+x: <svg {...s} viewBox="0 0 24 24" className={className}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+
+chevDown: <svg {...s} viewBox="0 0 24 24" className={className}><polyline points="6,9 12,15 18,9"/></svg>,
+
+chevRight: <svg {...s} viewBox="0 0 24 24" className={className}><polyline points="9,6 15,12 9,18"/></svg>,
+
+clock: <svg {...s} viewBox="0 0 24 24" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>,
+
+menu: <svg {...s} viewBox="0 0 24 24" className={className}><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+
+mic: <svg {...s} viewBox="0 0 24 24" className={className}><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>,
+
+user: <svg {...s} viewBox="0 0 24 24" className={className}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+
+disc: <svg {...s} viewBox="0 0 24 24" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>,
+
+trending: <svg {...s} viewBox="0 0 24 24" className={className}><polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/><polyline points="17,6 23,6 23,12"/></svg>,
+
+back: <svg {...s} viewBox="0 0 24 24" className={className}><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>,
+
+more: <svg {...s} viewBox="0 0 24 24" className={className}><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/><circle cx="5" cy="12" r="1" fill="currentColor"/></svg>,
+
+};
+
+return icons[name] || null;
+
+};
+
+// ─────────────────────────────────────────────
+
+// WAVEFORM VISUALIZER
+
+// ─────────────────────────────────────────────
+
+const Waveform = ({ isPlaying, color = "#8B5CF6", bars = 32 }) => {
+
+const [heights, setHeights] = useState(() => Array.from({ length: bars }, () => Math.random() * 0.3 + 0.1));
+
+useEffect(() => {
+
+if (!isPlaying) return;
+
+const id = setInterval(() => {
+
+setHeights(prev => prev.map((h) => {
+
+const target = Math.random() * 0.8 + 0.2;
+
+return h + (target - h) * 0.3;
+
+}));
+
+}, 120);
+
+return () => clearInterval(id);
+
+}, [isPlaying, bars]);
+
+return (
+
+<div style={{ display: "flex", alignItems: "end", gap: 1.5, height: 28 }}>
+
+{heights.map((h, i) => (
+
+<div key={i} style={{
+
+width: 2.5,
+
+height: `${h * 100}%`,
+
+backgroundColor: color,
+
+borderRadius: 1,
+
+opacity: isPlaying ? 0.9 : 0.3,
+
+transition: "height 0.12s ease, opacity 0.3s",
+
+}} />
+
+))}
+
+</div>
+
+);
+
+};
+
+// ─────────────────────────────────────────────
+
+// MAIN APP COMPONENT
+
+// ─────────────────────────────────────────────
+
+export default function ManosliPlus() {
+
+// Navigation
+
+const [page, setPage] = useState("home");
+
+const [pageStack, setPageStack] = useState([]);
+
+const [sidebarOpen, setSidebarOpen] = useState(false);
+
+// Player state
+
+const [currentTrack, setCurrentTrack] = useState(null);
+
+const [isPlaying, setIsPlaying] = useState(false);
+
+const [progress, setProgress] = useState(0);
+
+const [volume, setVolume] = useState(0.75);
+
+const [muted, setMuted] = useState(false);
+
+const [shuffleOn, setShuffleOn] = useState(false);
+
+const [repeatMode, setRepeatMode] = useState(0); // 0=off, 1=all, 2=one
+
+const [showQueue, setShowQueue] = useState(false);
+
+const [showFullPlayer, setShowFullPlayer] = useState(false);
+
+// Library
+
+const [likedTracks, setLikedTracks] = useState(new Set(["t5", "t11", "t13"]));
+
+const [playlists, setPlaylists] = useState(PLAYLISTS_INIT);
+
+const [queue, setQueue] = useState([]);
+
+const [recentlyPlayed, setRecentlyPlayed] = useState(["t13", "t5", "t1", "t11", "t7"]);
+
+const [searchQuery, setSearchQuery] = useState("");
+
+const [searchFocused, setSearchFocused] = useState(false);
+
+// Detail views
+
+const [selectedAlbum, setSelectedAlbum] = useState(null);
+
+const [selectedArtist, setSelectedArtist] = useState(null);
+
+const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+
+const [selectedGenre, setSelectedGenre] = useState(null);
+
+// Modals
+
+const [showNewPlaylist, setShowNewPlaylist] = useState(false);
+
+const [newPlaylistName, setNewPlaylistName] = useState("");
+
+const [addToPlaylistTrack, setAddToPlaylistTrack] = useState(null);
+
+const [contextMenu, setContextMenu] = useState(null);
+
+// Progress simulation
+
+const progressRef = useRef(null);
+
+useEffect(() => {
+
+if (isPlaying && currentTrack) {
+
+progressRef.current = setInterval(() => {
+
+setProgress(p => {
+
+if (p >= currentTrack.duration) {
+
+handleNext();
+
+return 0;
+
+}
+
+return p + 1;
+
+});
+
+}, 1000);
+
+}
+
+return () => clearInterval(progressRef.current);
+
+}, [isPlaying, currentTrack?.id]);
+
+// Navigation helpers
+
+const navigateTo = useCallback((pg, data) => {
+
+setPageStack(prev => [...prev, { page, selectedAlbum, selectedArtist, selectedPlaylist, selectedGenre }]);
+
+setPage(pg);
+
+if (data?.album) setSelectedAlbum(data.album);
+
+if (data?.artist) setSelectedArtist(data.artist);
+
+if (data?.playlist) setSelectedPlaylist(data.playlist);
+
+if (data?.genre) setSelectedGenre(data.genre);
+
+setSidebarOpen(false);
+
+}, [page, selectedAlbum, selectedArtist, selectedPlaylist, selectedGenre]);
+
+const goBack = useCallback(() => {
+
+const prev = pageStack[pageStack.length - 1];
+
+if (prev) {
+
+setPage(prev.page);
+
+setSelectedAlbum(prev.selectedAlbum);
+
+setSelectedArtist(prev.selectedArtist);
+
+setSelectedPlaylist(prev.selectedPlaylist);
+
+setSelectedGenre(prev.selectedGenre);
+
+setPageStack(s => s.slice(0, -1));
+
+}
+
+}, [pageStack]);
+
+const navTo = useCallback((pg) => {
+
+setPage(pg);
+
+setPageStack([]);
+
+setSidebarOpen(false);
+
+}, []);
+
+// Player actions
+
+const playTrack = useCallback((track) => {
+
+setCurrentTrack(track);
+
+setIsPlaying(true);
+
+setProgress(0);
+
+setRecentlyPlayed(prev => {
+
+const filtered = prev.filter(id => id !== track.id);
+
+return [track.id, ...filtered].slice(0, 20);
+
+});
+
+}, []);
+
+const togglePlay = useCallback(() => setIsPlaying(p => !p), []);
+
+const handleNext = useCallback(() => {
+
+if (queue.length > 0) {
+
+const nextId = queue[0];
+
+const nextTrack = TRACKS.find(t => t.id === nextId);
+
+if (nextTrack) {
+
+playTrack(nextTrack);
+
+setQueue(q => q.slice(1));
+
+}
+
+} else if (currentTrack) {
+
+const idx = TRACKS.findIndex(t => t.id === currentTrack.id);
+
+const next = shuffleOn
+
+? TRACKS[Math.floor(Math.random() * TRACKS.length)]
+
+: TRACKS[(idx + 1) % TRACKS.length];
+
+playTrack(next);
+
+}
+
+}, [queue, currentTrack, shuffleOn, playTrack]);
+
+const handlePrev = useCallback(() => {
+
+if (progress > 3) {
+
+setProgress(0);
+
+return;
+
+}
+
+if (currentTrack) {
+
+const idx = TRACKS.findIndex(t => t.id === currentTrack.id);
+
+const prev = TRACKS[(idx - 1 + TRACKS.length) % TRACKS.length];
+
+playTrack(prev);
+
+}
+
+}, [progress, currentTrack, playTrack]);
+
+const toggleLike = useCallback((id) => {
+
+setLikedTracks(prev => {
+
+const next = new Set(prev);
+
+next.has(id) ? next.delete(id) : next.add(id);
+
+return next;
+
+});
+
+}, []);
+
+const addToQueue = useCallback((trackId) => {
+
+setQueue(q => [...q, trackId]);
+
+}, []);
+
+const addTrackToPlaylist = useCallback((playlistId, trackId) => {
+
+setPlaylists(prev => prev.map(p =>
+
+p.id === playlistId && !p.tracks.includes(trackId)
+
+? { ...p, tracks: [...p.tracks, trackId] }
+
+: p
+
+));
+
+setAddToPlaylistTrack(null);
+
+}, []);
+
+const createPlaylist = useCallback(() => {
+
+if (!newPlaylistName.trim()) return;
+
+const np = {
+
+id: `p${Date.now()}`,
+
+name: newPlaylistName.trim(),
+
+description: "",
+
+cover: "🎵",
+
+color: GENRES[Math.floor(Math.random() * GENRES.length)].color,
+
+tracks: [],
+
+};
+
+setPlaylists(prev => [...prev, np]);
+
+setNewPlaylistName("");
+
+setShowNewPlaylist(false);
+
+}, [newPlaylistName]);
+
+const removeFromPlaylist = useCallback((playlistId, trackId) => {
+
+setPlaylists(prev => prev.map(p =>
+
+p.id === playlistId ? { ...p, tracks: p.tracks.filter(t => t !== trackId) } : p
+
+));
+
+}, []);
+
+// Search
+
+const searchResults = useMemo(() => {
+
+if (!searchQuery.trim()) return null;
+
+const q = searchQuery.toLowerCase();
+
+return {
+
+tracks: TRACKS.filter(t => t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q)),
+
+albums: ALBUMS.filter(a => a.title.toLowerCase().includes(q) || a.artistName.toLowerCase().includes(q)),
+
+artists: ARTISTS.filter(a => a.name.toLowerCase().includes(q) || a.genre.toLowerCase().includes(q)),
+
+};
+
+}, [searchQuery]);
+
+// Track album helper
+
+const getAlbumTracks = useCallback((albumId) => TRACKS.filter(t => t.albumId === albumId), []);
+
+const getArtistTracks = useCallback((artistId) => TRACKS.filter(t => t.artistId === artistId), []);
+
+const getArtistAlbums = useCallback((artistId) => ALBUMS.filter(a => a.artist === artistId), []);
+
+// ─────────────────────────────────────────
+
+// STYLES
+
+// ─────────────────────────────────────────
+
+const theme = {
+
+bg: "#08080D",
+
+surface: "#111118",
+
+surfaceHover: "#1A1A24",
+
+surfaceActive: "#222230",
+
+border: "#1E1E2A",
+
+text: "#E8E6F0",
+
+textSecondary: "#7A7890",
+
+accent: "#8B5CF6",
+
+accentHover: "#7C3AED",
+
+pink: "#EC4899",
+
+green: "#10B981",
+
+red: "#EF4444",
+
+};
+
+const css = {
+
+app: { display: "flex", flexDirection: "column", height: "100vh", background: theme.bg, color: theme.text, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", overflow: "hidden", position: "relative", fontSize: 14 },
+
+sidebar: { position: "fixed", top: 0, left: 0, bottom: 0, width: 240, background: "#0C0C12", borderRight: `1px solid ${theme.border}`, zIndex: 50, display: "flex", flexDirection: "column", transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)" },
+
+sidebarOverlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 49, backdropFilter: "blur(4px)" },
+
+main: { flex: 1, overflow: "auto", paddingBottom: currentTrack ? 140 : 20 },
+
+topBar: { position: "sticky", top: 0, zIndex: 30, display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: `${theme.bg}ee`, backdropFilter: "blur(12px)" },
+
+player: { position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 40, background: `${theme.surface}f0`, backdropFilter: "blur(20px)", borderTop: `1px solid ${theme.border}` },
+
+};
+
+// ─────────────────────────────────────────
+
+// SHARED COMPONENTS
+
+// ─────────────────────────────────────────
+
+const TrackRow = ({ track, index, showAlbum = true, playlistId = null, compact = false }) => {
+
+const isActive = currentTrack?.id === track.id;
+
+return (
+
+<div
+
+onClick={() => playTrack(track)}
+
+style={{
+
+display: "flex", alignItems: "center", gap: 12, padding: compact ? "8px 0" : "10px 12px",
+
+borderRadius: 8, cursor: "pointer", transition: "background 0.15s",
+
+background: isActive ? `${theme.accent}15` : "transparent",
+
+}}
+
+onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = theme.surfaceHover; }}
+
+onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isActive ? `${theme.accent}15` : "transparent"; }}
+
+>
+
+<span style={{ width: 24, textAlign: "center", color: isActive ? theme.accent : theme.textSecondary, fontSize: 13, flexShrink: 0 }}>
+
+{isActive && isPlaying ? <Waveform isPlaying bars={4} color={theme.accent} /> : (index != null ? index + 1 : "·")}
+
+</span>
+
+<div style={{ flex: 1, minWidth: 0 }}>
+
+<div style={{ color: isActive ? theme.accent : theme.text, fontSize: 14, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{track.title}</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 12, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+
+<span onClick={e => { e.stopPropagation(); navigateTo("artist", { artist: ARTISTS.find(a => a.id === track.artistId) }); }} style={{ cursor: "pointer" }}
+
+onMouseEnter={e => e.target.style.color = theme.text} onMouseLeave={e => e.target.style.color = theme.textSecondary}>
+
+{track.artist}
+
+</span>
+
+{showAlbum && <> · <span onClick={e => { e.stopPropagation(); navigateTo("album", { album: ALBUMS.find(a => a.id === track.albumId) }); }} style={{ cursor: "pointer" }}
+
+onMouseEnter={e => e.target.style.color = theme.text} onMouseLeave={e => e.target.style.color = theme.textSecondary}>
+
+{track.album}
+
+</span></>}
+
+</div>
+
+</div>
+
+<div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+
+<button onClick={e => { e.stopPropagation(); toggleLike(track.id); }}
+
+style={{ background: "none", border: "none", cursor: "pointer", color: likedTracks.has(track.id) ? theme.pink : theme.textSecondary, padding: 4, display: "flex" }}>
+
+<Icon name={likedTracks.has(track.id) ? "heartFill" : "heart"} size={16} />
+
+</button>
+
+<button onClick={e => { e.stopPropagation(); setContextMenu({ track, playlistId, x: e.clientX, y: e.clientY }); }}
+
+style={{ background: "none", border: "none", cursor: "pointer", color: theme.textSecondary, padding: 4, display: "flex" }}>
+
+<Icon name="more" size={16} />
+
+</button>
+
+<span style={{ color: theme.textSecondary, fontSize: 12, width: 36, textAlign: "right" }}>{fmt(track.duration)}</span>
+
+</div>
+
+</div>
+
+);
+
+};
+
+const AlbumCard = ({ album }) => (
+
+<div
+
+onClick={() => navigateTo("album", { album })}
+
+style={{ cursor: "pointer", width: "100%", flexShrink: 0 }}
+
+>
+
+<div style={{
+
+aspectRatio: "1", borderRadius: 10, background: `linear-gradient(135deg, ${album.color}40, ${album.color}15)`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, marginBottom: 8,
+
+position: "relative", overflow: "hidden", transition: "transform 0.2s",
+
+}}
+
+onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
+
+onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+
+>
+
+{album.cover}
+
+<div style={{ position: "absolute", bottom: 8, right: 8, width: 36, height: 36, borderRadius: "50%",
+
+background: theme.accent, display: "flex", alignItems: "center", justifyContent: "center",
+
+opacity: 0, transition: "opacity 0.2s", boxShadow: "0 4px 12px rgba(139,92,246,0.4)" }}
+
+className="play-btn">
+
+<Icon name="play" size={16} />
+
+</div>
+
+</div>
+
+<div style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{album.title}</div>
+
+<div style={{ fontSize: 12, color: theme.textSecondary, marginTop: 2 }}>{album.artistName}</div>
+
+</div>
+
+);
+
+const ArtistCard = ({ artist }) => (
+
+<div onClick={() => navigateTo("artist", { artist })} style={{ cursor: "pointer", textAlign: "center", flexShrink: 0 }}>
+
+<div style={{
+
+width: "100%", aspectRatio: "1", borderRadius: "50%",
+
+background: `linear-gradient(135deg, ${artist.color}50, ${artist.color}20)`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32,
+
+marginBottom: 8, transition: "transform 0.2s",
+
+}}
+
+onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+
+onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+
+>
+
+{artist.image}
+
+</div>
+
+<div style={{ fontSize: 13, fontWeight: 600 }}>{artist.name}</div>
+
+<div style={{ fontSize: 11, color: theme.textSecondary, marginTop: 2 }}>{artist.genre}</div>
+
+</div>
+
+);
+
+const SectionHeader = ({ title, action, onAction }) => (
+
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 16px" }}>
+
+<h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em", margin: 0 }}>{title}</h2>
+
+{action && <button onClick={onAction} style={{ background: "none", border: "none", color: theme.textSecondary, fontSize: 12, cursor: "pointer", fontWeight: 500, padding: "4px 8px" }}
+
+onMouseEnter={e => e.target.style.color = theme.text} onMouseLeave={e => e.target.style.color = theme.textSecondary}>
+
+{action}
+
+</button>}
+
+</div>
+
+);
+
+const ScrollRow = ({ children }) => (
+
+<div style={{ display: "flex", gap: 14, overflowX: "auto", padding: "0 16px", scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
+
+{children}
+
+</div>
+
+);
+
+const GridRow = ({ children, cols = 2 }) => (
+
+<div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 14, padding: "0 16px" }}>
+
+{children}
+
+</div>
+
+);
+
+const Pill = ({ active, children, onClick, color }) => (
+
+<button onClick={onClick} style={{
+
+padding: "7px 16px", borderRadius: 20, border: "none", fontSize: 13, fontWeight: 500, cursor: "pointer",
+
+background: active ? (color || theme.accent) : theme.surfaceHover,
+
+color: active ? "#fff" : theme.textSecondary,
+
+whiteSpace: "nowrap", transition: "all 0.15s", flexShrink: 0,
+
+}}>
+
+{children}
+
+</button>
+
+);
+
+const ProgressBar = ({ value, max, onChange, height = 4, color = theme.accent }) => {
+
+const ref = useRef(null);
+
+const pct = max > 0 ? (value / max) * 100 : 0;
+
+const handleClick = (e) => {
+
+if (!ref.current || !onChange) return;
+
+const rect = ref.current.getBoundingClientRect();
+
+const x = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+
+onChange(x * max);
+
+};
+
+return (
+
+<div ref={ref} onClick={handleClick} style={{ width: "100%", height: height + 8, display: "flex", alignItems: "center", cursor: onChange ? "pointer" : "default" }}>
+
+<div style={{ width: "100%", height, background: theme.surfaceActive, borderRadius: height / 2, position: "relative", overflow: "hidden" }}>
+
+<div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: height / 2, transition: "width 0.1s linear" }} />
+
+</div>
+
+</div>
+
+);
+
+};
+
+// ─────────────────────────────────────────
+
+// CONTEXT MENU
+
+// ─────────────────────────────────────────
+
+const ContextMenuEl = () => {
+
+if (!contextMenu) return null;
+
+const { track, playlistId } = contextMenu;
+
+const items = [
+
+{ label: "Add to Queue", action: () => { addToQueue(track.id); setContextMenu(null); } },
+
+{ label: "Add to Playlist", action: () => { setAddToPlaylistTrack(track.id); setContextMenu(null); } },
+
+{ label: likedTracks.has(track.id) ? "Unlike" : "Like", action: () => { toggleLike(track.id); setContextMenu(null); } },
+
+{ label: "Go to Artist", action: () => { navigateTo("artist", { artist: ARTISTS.find(a => a.id === track.artistId) }); setContextMenu(null); } },
+
+{ label: "Go to Album", action: () => { navigateTo("album", { album: ALBUMS.find(a => a.id === track.albumId) }); setContextMenu(null); } },
+
+];
+
+if (playlistId) {
+
+items.push({ label: "Remove from Playlist", action: () => { removeFromPlaylist(playlistId, track.id); setContextMenu(null); }, danger: true });
+
+}
+
+return (
+
+<>
+
+<div onClick={() => setContextMenu(null)} style={css.sidebarOverlay} />
+
+<div style={{
+
+position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 60,
+
+background: theme.surface, borderTop: `1px solid ${theme.border}`,
+
+borderRadius: "16px 16px 0 0", padding: "8px 0 24px",
+
+animation: "slideUp 0.2s ease",
+
+}}>
+
+<div style={{ width: 36, height: 4, background: theme.surfaceActive, borderRadius: 2, margin: "4px auto 12px" }} />
+
+<div style={{ padding: "8px 16px 12px", display: "flex", alignItems: "center", gap: 12 }}>
+
+<div style={{ width: 44, height: 44, borderRadius: 6, background: `linear-gradient(135deg, ${ALBUMS.find(a => a.id === track.albumId)?.color || theme.accent}40, ${theme.surface})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+
+{ALBUMS.find(a => a.id === track.albumId)?.cover || "🎵"}
+
+</div>
+
+<div>
+
+<div style={{ fontWeight: 600, fontSize: 14 }}>{track.title}</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 12 }}>{track.artist}</div>
+
+</div>
+
+</div>
+
+{items.map((item, i) => (
+
+<button key={i} onClick={item.action} style={{
+
+display: "block", width: "100%", textAlign: "left", padding: "14px 20px", background: "none",
+
+border: "none", color: item.danger ? theme.red : theme.text, fontSize: 15, cursor: "pointer",
+
+}}
+
+onMouseEnter={e => e.target.style.background = theme.surfaceHover}
+
+onMouseLeave={e => e.target.style.background = "none"}
+
+>
+
+{item.label}
+
+</button>
+
+))}
+
+</div>
+
+</>
+
+);
+
+};
+
+// ─────────────────────────────────────────
+
+// ADD TO PLAYLIST MODAL
+
+// ─────────────────────────────────────────
+
+const AddToPlaylistModal = () => {
+
+if (!addToPlaylistTrack) return null;
+
+return (
+
+<>
+
+<div onClick={() => setAddToPlaylistTrack(null)} style={css.sidebarOverlay} />
+
+<div style={{
+
+position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 60,
+
+background: theme.surface, borderTop: `1px solid ${theme.border}`,
+
+borderRadius: "16px 16px 0 0", padding: "8px 0 24px", maxHeight: "60vh", overflow: "auto",
+
+}}>
+
+<div style={{ width: 36, height: 4, background: theme.surfaceActive, borderRadius: 2, margin: "4px auto 12px" }} />
+
+<div style={{ padding: "0 16px 12px", fontSize: 16, fontWeight: 700 }}>Add to Playlist</div>
+
+<button onClick={() => { setShowNewPlaylist(true); setAddToPlaylistTrack(null); }}
+
+style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "12px 20px", background: "none", border: "none", color: theme.accent, fontSize: 14, cursor: "pointer", fontWeight: 500 }}>
+
+<Icon name="plus" size={18} /> New Playlist
+
+</button>
+
+{playlists.map(p => (
+
+<button key={p.id} onClick={() => addTrackToPlaylist(p.id, addToPlaylistTrack)}
+
+style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "12px 20px", background: "none", border: "none", color: theme.text, fontSize: 14, cursor: "pointer", textAlign: "left" }}
+
+onMouseEnter={e => e.target.style.background = theme.surfaceHover} onMouseLeave={e => e.target.style.background = "none"}>
+
+<span style={{ fontSize: 20 }}>{p.cover}</span> {p.name}
+
+<span style={{ color: theme.textSecondary, fontSize: 12, marginLeft: "auto" }}>{p.tracks.length} tracks</span>
+
+</button>
+
+))}
+
+</div>
+
+</>
+
+);
+
+};
+
+// ─────────────────────────────────────────
+
+// NEW PLAYLIST MODAL
+
+// ─────────────────────────────────────────
+
+const NewPlaylistModal = () => {
+
+if (!showNewPlaylist) return null;
+
+return (
+
+<>
+
+<div onClick={() => setShowNewPlaylist(false)} style={css.sidebarOverlay} />
+
+<div style={{
+
+position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 60,
+
+background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: 16, padding: 24, width: "calc(100% - 48px)", maxWidth: 340,
+
+}}>
+
+<div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>New Playlist</div>
+
+<input
+
+value={newPlaylistName} onChange={e => setNewPlaylistName(e.target.value)}
+
+placeholder="Playlist name"
+
+autoFocus
+
+style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${theme.border}`, background: theme.surfaceHover, color: theme.text, fontSize: 15, outline: "none", boxSizing: "border-box" }}
+
+onKeyDown={e => e.key === "Enter" && createPlaylist()}
+
+/>
+
+<div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end" }}>
+
+<button onClick={() => setShowNewPlaylist(false)} style={{ padding: "10px 20px", borderRadius: 10, background: theme.surfaceHover, border: "none", color: theme.text, cursor: "pointer", fontSize: 14 }}>Cancel</button>
+
+<button onClick={createPlaylist} style={{ padding: "10px 20px", borderRadius: 10, background: theme.accent, border: "none", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 14, opacity: newPlaylistName.trim() ? 1 : 0.4 }}>Create</button>
+
+</div>
+
+</div>
+
+</>
+
+);
+
+};
+
+// ─────────────────────────────────────────
+
+// SIDEBAR
+
+// ─────────────────────────────────────────
+
+const Sidebar = () => (
+
+<>
+
+{sidebarOpen && <div onClick={() => setSidebarOpen(false)} style={css.sidebarOverlay} />}
+
+<div style={{ ...css.sidebar, transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)" }}>
+
+<div style={{ padding: "20px 16px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+
+<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+
+<div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg, ${theme.accent}, ${theme.pink})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800 }}>m</div>
+
+<span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.03em" }}>manosli<span style={{ color: theme.accent }}>+</span></span>
+
+</div>
+
+<button onClick={() => setSidebarOpen(false)} style={{ background: "none", border: "none", color: theme.textSecondary, cursor: "pointer", padding: 4, display: "flex" }}><Icon name="x" size={20} /></button>
+
+</div>
+
+<nav style={{ padding: "0 8px", flex: 1 }}>
+
+{[
+
+{ id: "home", icon: "home", label: "Home" },
+
+{ id: "search", icon: "search", label: "Search" },
+
+{ id: "library", icon: "library", label: "Your Library" },
+
+].map(item => (
+
+<button key={item.id} onClick={() => navTo(item.id)} style={{
+
+display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 12px",
+
+borderRadius: 8, border: "none", cursor: "pointer", fontSize: 14, fontWeight: page === item.id ? 600 : 400,
+
+background: page === item.id ? theme.surfaceHover : "transparent",
+
+color: page === item.id ? theme.text : theme.textSecondary,
+
+transition: "all 0.15s",
+
+}}>
+
+<Icon name={item.icon} size={20} /> {item.label}
+
+</button>
+
+))}
+
+<div style={{ margin: "16px 12px 8px", fontSize: 11, fontWeight: 600, color: theme.textSecondary, letterSpacing: "0.06em", textTransform: "uppercase" }}>Your Playlists</div>
+
+{playlists.map(p => (
+
+<button key={p.id} onClick={() => navigateTo("playlist", { playlist: p })} style={{
+
+display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 12px",
+
+borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13,
+
+background: selectedPlaylist?.id === p.id && page === "playlist" ? theme.surfaceHover : "transparent",
+
+color: selectedPlaylist?.id === p.id && page === "playlist" ? theme.text : theme.textSecondary,
+
+textAlign: "left",
+
+}}>
+
+<span style={{ fontSize: 16 }}>{p.cover}</span> {p.name}
+
+</button>
+
+))}
+
+<button onClick={() => setShowNewPlaylist(true)} style={{
+
+display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 12px",
+
+borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13,
+
+background: "transparent", color: theme.accent,
+
+}}>
+
+<Icon name="plus" size={16} /> New Playlist
+
+</button>
+
+</nav>
+
+<div style={{ padding: "16px", borderTop: `1px solid ${theme.border}` }}>
+
+<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+
+<div style={{ width: 32, height: 32, borderRadius: "50%", background: `linear-gradient(135deg, ${theme.accent}, ${theme.pink})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+
+<Icon name="user" size={16} />
+
+</div>
+
+<div>
+
+<div style={{ fontSize: 13, fontWeight: 600 }}>Listener</div>
+
+<div style={{ fontSize: 11, color: theme.accent }}>Premium</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</>
+
+);
+
+// ─────────────────────────────────────────
+
+// TOP BAR
+
+// ─────────────────────────────────────────
+
+const TopBar = () => (
+
+<div style={css.topBar}>
+
+{pageStack.length > 0 ? (
+
+<button onClick={goBack} style={{ background: "none", border: "none", color: theme.text, cursor: "pointer", padding: 4, display: "flex" }}>
+
+<Icon name="back" size={22} />
+
+</button>
+
+) : (
+
+<button onClick={() => setSidebarOpen(true)} style={{ background: "none", border: "none", color: theme.text, cursor: "pointer", padding: 4, display: "flex" }}>
+
+<Icon name="menu" size={22} />
+
+</button>
+
+)}
+
+{page === "search" ? (
+
+<div style={{ flex: 1, position: "relative" }}>
+
+<input
+
+value={searchQuery}
+
+onChange={e => setSearchQuery(e.target.value)}
+
+placeholder="Songs, artists, albums..."
+
+autoFocus
+
+onFocus={() => setSearchFocused(true)}
+
+onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+
+style={{
+
+width: "100%", padding: "10px 14px 10px 36px", borderRadius: 10,
+
+background: theme.surfaceHover, border: `1px solid ${searchFocused ? theme.accent : "transparent"}`,
+
+color: theme.text, fontSize: 14, outline: "none", boxSizing: "border-box",
+
+transition: "border-color 0.2s",
+
+}}
+
+/>
+
+<div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: theme.textSecondary }}>
+
+<Icon name="search" size={16} />
+
+</div>
+
+</div>
+
+) : (
+
+<>
+
+<div style={{ flex: 1 }}>
+
+<span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em" }}>
+
+{page === "home" && <>manosli<span style={{ color: theme.accent }}>+</span></>}
+
+{page === "library" && "Your Library"}
+
+{page === "album" && selectedAlbum?.title}
+
+{page === "artist" && selectedArtist?.name}
+
+{page === "playlist" && selectedPlaylist?.name}
+
+{page === "genre" && selectedGenre?.name}
+
+</span>
+
+</div>
+
+<button onClick={() => navTo("search")} style={{ background: "none", border: "none", color: theme.textSecondary, cursor: "pointer", padding: 4, display: "flex" }}>
+
+<Icon name="search" size={20} />
+
+</button>
+
+</>
+
+)}
+
+</div>
+
+);
+
+// ─────────────────────────────────────────
+
+// PAGES
+
+// ─────────────────────────────────────────
+
+// HOME PAGE
+
+const HomePage = () => {
+
+const recentTracks = recentlyPlayed.map(id => TRACKS.find(t => t.id === id)).filter(Boolean).slice(0, 6);
+
+const topCharts = [...TRACKS].sort((a, b) => parseFloat(b.plays) - parseFloat(a.plays)).slice(0, 10);
+
+const newReleases = ALBUMS.filter(a => a.year === 2026);
+
+const greetHour = new Date().getHours();
+
+const greeting = greetHour < 12 ? "Good morning" : greetHour < 18 ? "Good afternoon" : "Good evening";
+
+return (
+
+<div style={{ paddingBottom: 20 }}>
+
+{/* Hero */}
+
+<div style={{
+
+margin: "0 16px 24px", borderRadius: 16, padding: "28px 20px",
+
+background: `linear-gradient(135deg, ${theme.accent}30, ${theme.pink}15, ${theme.bg})`,
+
+position: "relative", overflow: "hidden",
+
+}}>
+
+<div style={{ position: "absolute", top: -30, right: -20, fontSize: 80, opacity: 0.08, transform: "rotate(15deg)" }}>♪</div>
+
+<div style={{ fontSize: 13, color: theme.accent, fontWeight: 600, marginBottom: 6, letterSpacing: "0.04em" }}>{greeting}</div>
+
+<div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.2 }}>What do you want<br />to listen to?</div>
+
+<button onClick={() => navTo("search")} style={{
+
+marginTop: 14, padding: "10px 20px", borderRadius: 24, background: theme.accent, border: "none",
+
+color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
+
+}}>
+
+<Icon name="search" size={14} /> Browse music
+
+</button>
+
+</div>
+
+{/* Quick play — recently played as compact grid */}
+
+{recentTracks.length > 0 && (
+
+<>
+
+<SectionHeader title="Jump back in" />
+
+<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "0 16px", marginBottom: 28 }}>
+
+{recentTracks.map(track => (
+
+<div key={track.id} onClick={() => playTrack(track)} style={{
+
+display: "flex", alignItems: "center", gap: 10, padding: 0, borderRadius: 6,
+
+background: theme.surface, overflow: "hidden", cursor: "pointer", transition: "background 0.15s",
+
+}}
+
+onMouseEnter={e => e.currentTarget.style.background = theme.surfaceHover}
+
+onMouseLeave={e => e.currentTarget.style.background = theme.surface}
+
+>
+
+<div style={{
+
+width: 44, height: 44, flexShrink: 0,
+
+background: `linear-gradient(135deg, ${ALBUMS.find(a => a.id === track.albumId)?.color || theme.accent}50, ${theme.surface})`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
+
+}}>
+
+{ALBUMS.find(a => a.id === track.albumId)?.cover || "🎵"}
+
+</div>
+
+<div style={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingRight: 10 }}>
+
+{track.title}
+
+</div>
+
+</div>
+
+))}
+
+</div>
+
+</>
+
+)}
+
+{/* New Releases */}
+
+<SectionHeader title="New Releases" action="See all" />
+
+<ScrollRow>
+
+{newReleases.map(album => (
+
+<div key={album.id} style={{ width: 140, flexShrink: 0 }}>
+
+<AlbumCard album={album} />
+
+</div>
+
+))}
+
+</ScrollRow>
+
+<div style={{ height: 28 }} />
+
+{/* Top Charts */}
+
+<SectionHeader title="Top Charts" />
+
+<div style={{ padding: "0 16px" }}>
+
+{topCharts.slice(0, 5).map((track, i) => (
+
+<TrackRow key={track.id} track={track} index={i} />
+
+))}
+
+</div>
+
+<div style={{ height: 28 }} />
+
+{/* Featured Artists */}
+
+<SectionHeader title="Featured Artists" />
+
+<ScrollRow>
+
+{ARTISTS.slice(0, 6).map(artist => (
+
+<div key={artist.id} style={{ width: 100, flexShrink: 0 }}>
+
+<ArtistCard artist={artist} />
+
+</div>
+
+))}
+
+</ScrollRow>
+
+<div style={{ height: 28 }} />
+
+{/* Browse Genres */}
+
+<SectionHeader title="Browse Genres" action="See all" onAction={() => navTo("search")} />
+
+<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 16px" }}>
+
+{GENRES.slice(0, 6).map(genre => (
+
+<div key={genre.id} onClick={() => navigateTo("genre", { genre })} style={{
+
+padding: "16px 14px", borderRadius: 10, cursor: "pointer",
+
+background: `linear-gradient(135deg, ${genre.color}35, ${genre.color}10)`,
+
+position: "relative", overflow: "hidden",
+
+}}>
+
+<div style={{ fontSize: 14, fontWeight: 700 }}>{genre.name}</div>
+
+<div style={{ position: "absolute", bottom: -6, right: 4, fontSize: 28, opacity: 0.3, transform: "rotate(-10deg)" }}>{genre.icon}</div>
+
+</div>
+
+))}
+
+</div>
+
+<div style={{ height: 28 }} />
+
+{/* Made For You — Playlists */}
+
+<SectionHeader title="Made for you" />
+
+<ScrollRow>
+
+{playlists.map(p => (
+
+<div key={p.id} onClick={() => navigateTo("playlist", { playlist: p })} style={{ width: 140, flexShrink: 0, cursor: "pointer" }}>
+
+<div style={{
+
+aspectRatio: "1", borderRadius: 10,
+
+background: `linear-gradient(135deg, ${p.color}40, ${p.color}15)`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, marginBottom: 8,
+
+}}>
+
+{p.cover}
+
+</div>
+
+<div style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</div>
+
+<div style={{ fontSize: 11, color: theme.textSecondary, marginTop: 2 }}>{p.tracks.length} tracks</div>
+
+</div>
+
+))}
+
+</ScrollRow>
+
+<div style={{ height: 28 }} />
+
+{/* All Albums */}
+
+<SectionHeader title="Albums" />
+
+<GridRow>
+
+{ALBUMS.slice(0, 6).map(album => <AlbumCard key={album.id} album={album} />)}
+
+</GridRow>
+
+</div>
+
+);
+
+};
+
+// SEARCH PAGE
+
+const SearchPage = () => {
+
+const [activeFilter, setActiveFilter] = useState("all");
+
+return (
+
+<div style={{ paddingBottom: 20 }}>
+
+{searchResults ? (
+
+<>
+
+<div style={{ display: "flex", gap: 8, padding: "8px 16px 16px", overflowX: "auto" }}>
+
+{["all", "tracks", "albums", "artists"].map(f => (
+
+<Pill key={f} active={activeFilter === f} onClick={() => setActiveFilter(f)}>
+
+{f.charAt(0).toUpperCase() + f.slice(1)}
+
+</Pill>
+
+))}
+
+</div>
+
+{(activeFilter === "all" || activeFilter === "artists") && searchResults.artists.length > 0 && (
+
+<>
+
+<SectionHeader title="Artists" />
+
+<div style={{ padding: "0 16px", marginBottom: 20 }}>
+
+{searchResults.artists.map(artist => (
+
+<div key={artist.id} onClick={() => navigateTo("artist", { artist })} style={{
+
+display: "flex", alignItems: "center", gap: 12, padding: "10px 0", cursor: "pointer",
+
+}}>
+
+<div style={{ width: 48, height: 48, borderRadius: "50%", background: `linear-gradient(135deg, ${artist.color}50, ${artist.color}20)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+
+{artist.image}
+
+</div>
+
+<div>
+
+<div style={{ fontWeight: 600, fontSize: 14 }}>{artist.name}</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 12 }}>Artist · {artist.followers} followers</div>
+
+</div>
+
+</div>
+
+))}
+
+</div>
+
+</>
+
+)}
+
+{(activeFilter === "all" || activeFilter === "tracks") && searchResults.tracks.length > 0 && (
+
+<>
+
+<SectionHeader title="Tracks" />
+
+<div style={{ padding: "0 16px", marginBottom: 20 }}>
+
+{searchResults.tracks.map((track, i) => <TrackRow key={track.id} track={track} index={i} />)}
+
+</div>
+
+</>
+
+)}
+
+{(activeFilter === "all" || activeFilter === "albums") && searchResults.albums.length > 0 && (
+
+<>
+
+<SectionHeader title="Albums" />
+
+<GridRow>{searchResults.albums.map(album => <AlbumCard key={album.id} album={album} />)}</GridRow>
+
+</>
+
+)}
+
+{searchResults.tracks.length === 0 && searchResults.albums.length === 0 && searchResults.artists.length === 0 && (
+
+<div style={{ textAlign: "center", padding: "60px 20px", color: theme.textSecondary }}>
+
+<div style={{ fontSize: 40, marginBottom: 12 }}>🔍</div>
+
+<div style={{ fontSize: 16, fontWeight: 600, color: theme.text, marginBottom: 4 }}>No results</div>
+
+<div style={{ fontSize: 13 }}>Try a different search term</div>
+
+</div>
+
+)}
+
+</>
+
+) : (
+
+<>
+
+<SectionHeader title="Browse All" />
+
+<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 16px" }}>
+
+{GENRES.map(genre => (
+
+<div key={genre.id} onClick={() => navigateTo("genre", { genre })} style={{
+
+padding: "20px 14px", borderRadius: 10, cursor: "pointer",
+
+background: `linear-gradient(135deg, ${genre.color}35, ${genre.color}10)`,
+
+position: "relative", overflow: "hidden", minHeight: 80,
+
+}}>
+
+<div style={{ fontSize: 15, fontWeight: 700 }}>{genre.name}</div>
+
+<div style={{ position: "absolute", bottom: -4, right: 6, fontSize: 32, opacity: 0.25, transform: "rotate(-10deg)" }}>{genre.icon}</div>
+
+</div>
+
+))}
+
+</div>
+
+</>
+
+)}
+
+</div>
+
+);
+
+};
+
+// LIBRARY PAGE
+
+const LibraryPage = () => {
+
+const [libTab, setLibTab] = useState("playlists");
+
+const likedTracksList = TRACKS.filter(t => likedTracks.has(t.id));
+
+return (
+
+<div style={{ paddingBottom: 20 }}>
+
+<div style={{ display: "flex", gap: 8, padding: "8px 16px 20px", overflowX: "auto" }}>
+
+{["playlists", "liked", "artists", "albums"].map(t => (
+
+<Pill key={t} active={libTab === t} onClick={() => setLibTab(t)}>
+
+{t === "liked" ? "Liked Songs" : t.charAt(0).toUpperCase() + t.slice(1)}
+
+</Pill>
+
+))}
+
+</div>
+
+{libTab === "playlists" && (
+
+<div style={{ padding: "0 16px" }}>
+
+{/* Liked Songs card */}
+
+<div onClick={() => setLibTab("liked")} style={{
+
+display: "flex", alignItems: "center", gap: 14, padding: "14px 0",
+
+cursor: "pointer", borderBottom: `1px solid ${theme.border}`,
+
+}}>
+
+<div style={{
+
+width: 56, height: 56, borderRadius: 6, flexShrink: 0,
+
+background: `linear-gradient(135deg, ${theme.accent}, ${theme.pink})`,
+
+display: "flex", alignItems: "center", justifyContent: "center",
+
+}}>
+
+<Icon name="heartFill" size={22} />
+
+</div>
+
+<div>
+
+<div style={{ fontWeight: 700, fontSize: 15 }}>Liked Songs</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 12, marginTop: 2 }}>{likedTracks.size} songs</div>
+
+</div>
+
+</div>
+
+{playlists.map(p => (
+
+<div key={p.id} onClick={() => navigateTo("playlist", { playlist: p })} style={{
+
+display: "flex", alignItems: "center", gap: 14, padding: "14px 0",
+
+cursor: "pointer", borderBottom: `1px solid ${theme.border}`,
+
+}}>
+
+<div style={{
+
+width: 56, height: 56, borderRadius: 6, flexShrink: 0,
+
+background: `linear-gradient(135deg, ${p.color}40, ${p.color}15)`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24,
+
+}}>
+
+{p.cover}
+
+</div>
+
+<div>
+
+<div style={{ fontWeight: 600, fontSize: 14 }}>{p.name}</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 12, marginTop: 2 }}>Playlist · {p.tracks.length} songs</div>
+
+</div>
+
+</div>
+
+))}
+
+<button onClick={() => setShowNewPlaylist(true)} style={{
+
+display: "flex", alignItems: "center", gap: 14, padding: "14px 0", width: "100%",
+
+background: "none", border: "none", color: theme.accent, cursor: "pointer", fontSize: 14, fontWeight: 500,
+
+}}>
+
+<div style={{ width: 56, height: 56, borderRadius: 6, background: theme.surfaceHover, display: "flex", alignItems: "center", justifyContent: "center" }}>
+
+<Icon name="plus" size={22} />
+
+</div>
+
+Create Playlist
+
+</button>
+
+</div>
+
+)}
+
+{libTab === "liked" && (
+
+<div style={{ padding: "0 16px" }}>
+
+{likedTracksList.length > 0 ? (
+
+<>
+
+<button onClick={() => { likedTracksList.forEach(t => addToQueue(t.id)); playTrack(likedTracksList[0]); }}
+
+style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 16px", padding: "10px 24px", borderRadius: 24, background: theme.accent, border: "none", color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+
+<Icon name="play" size={16} /> Play All
+
+</button>
+
+{likedTracksList.map((track, i) => <TrackRow key={track.id} track={track} index={i} />)}
+
+</>
+
+) : (
+
+<div style={{ textAlign: "center", padding: "40px 20px", color: theme.textSecondary }}>
+
+<Icon name="heart" size={40} />
+
+<div style={{ fontSize: 15, fontWeight: 600, color: theme.text, marginTop: 12, marginBottom: 4 }}>No liked songs yet</div>
+
+<div style={{ fontSize: 13 }}>Tap the heart on any track to save it here</div>
+
+</div>
+
+)}
+
+</div>
+
+)}
+
+{libTab === "artists" && (
+
+<div style={{ padding: "0 16px" }}>
+
+{ARTISTS.map(artist => (
+
+<div key={artist.id} onClick={() => navigateTo("artist", { artist })} style={{
+
+display: "flex", alignItems: "center", gap: 14, padding: "12px 0", cursor: "pointer",
+
+borderBottom: `1px solid ${theme.border}`,
+
+}}>
+
+<div style={{ width: 48, height: 48, borderRadius: "50%", background: `linear-gradient(135deg, ${artist.color}50, ${artist.color}20)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+
+{artist.image}
+
+</div>
+
+<div>
+
+<div style={{ fontWeight: 600, fontSize: 14 }}>{artist.name}</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 12 }}>{artist.genre} · {artist.followers}</div>
+
+</div>
+
+</div>
+
+))}
+
+</div>
+
+)}
+
+{libTab === "albums" && (
+
+<GridRow>{ALBUMS.map(album => <AlbumCard key={album.id} album={album} />)}</GridRow>
+
+)}
+
+</div>
+
+);
+
+};
+
+// ALBUM PAGE
+
+const AlbumPage = () => {
+
+if (!selectedAlbum) return null;
+
+const tracks = getAlbumTracks(selectedAlbum.id);
+
+const artist = ARTISTS.find(a => a.id === selectedAlbum.artist);
+
+const totalDuration = tracks.reduce((s, t) => s + t.duration, 0);
+
+return (
+
+<div style={{ paddingBottom: 20 }}>
+
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 16px 28px", textAlign: "center" }}>
+
+<div style={{
+
+width: 180, height: 180, borderRadius: 12,
+
+background: `linear-gradient(135deg, ${selectedAlbum.color}50, ${selectedAlbum.color}15)`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 72, marginBottom: 16,
+
+boxShadow: `0 12px 40px ${selectedAlbum.color}30`,
+
+}}>
+
+{selectedAlbum.cover}
+
+</div>
+
+<div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.03em" }}>{selectedAlbum.title}</div>
+
+<div onClick={() => artist && navigateTo("artist", { artist })}
+
+style={{ color: theme.textSecondary, fontSize: 13, marginTop: 4, cursor: artist ? "pointer" : "default" }}
+
+onMouseEnter={e => artist && (e.target.style.color = theme.text)} onMouseLeave={e => (e.target.style.color = theme.textSecondary)}>
+
+{selectedAlbum.artistName} · {selectedAlbum.year}
+
+</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 12, marginTop: 4 }}>{tracks.length} songs · {Math.floor(totalDuration / 60)} min</div>
+
+<div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+
+<button onClick={() => { playTrack(tracks[0]); setQueue(tracks.slice(1).map(t => t.id)); }}
+
+style={{ padding: "10px 28px", borderRadius: 24, background: theme.accent, border: "none", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+
+<Icon name="play" size={16} /> Play
+
+</button>
+
+<button onClick={() => { const shuffled = [...tracks].sort(() => Math.random() - 0.5); playTrack(shuffled[0]); setQueue(shuffled.slice(1).map(t => t.id)); setShuffleOn(true); }}
+
+style={{ padding: "10px 20px", borderRadius: 24, background: theme.surfaceHover, border: "none", color: theme.text, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+
+<Icon name="shuffle" size={16} /> Shuffle
+
+</button>
+
+</div>
+
+</div>
+
+<div style={{ padding: "0 16px" }}>
+
+{tracks.map((track, i) => <TrackRow key={track.id} track={track} index={i} showAlbum={false} />)}
+
+</div>
+
+</div>
+
+);
+
+};
+
+// ARTIST PAGE
+
+const ArtistPage = () => {
+
+if (!selectedArtist) return null;
+
+const tracks = getArtistTracks(selectedArtist.id);
+
+const albums = getArtistAlbums(selectedArtist.id);
+
+const topTracks = [...tracks].sort((a, b) => parseFloat(b.plays) - parseFloat(a.plays)).slice(0, 5);
+
+return (
+
+<div style={{ paddingBottom: 20 }}>
+
+{/* Hero */}
+
+<div style={{
+
+padding: "30px 16px 28px", textAlign: "center",
+
+background: `linear-gradient(180deg, ${selectedArtist.color}20, transparent)`,
+
+}}>
+
+<div style={{
+
+width: 120, height: 120, borderRadius: "50%", margin: "0 auto 16px",
+
+background: `linear-gradient(135deg, ${selectedArtist.color}50, ${selectedArtist.color}20)`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48,
+
+boxShadow: `0 8px 32px ${selectedArtist.color}30`,
+
+}}>
+
+{selectedArtist.image}
+
+</div>
+
+<div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>{selectedArtist.name}</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 13, marginTop: 4 }}>{selectedArtist.followers} followers · {selectedArtist.genre}</div>
+
+<p style={{ color: theme.textSecondary, fontSize: 13, marginTop: 8, lineHeight: 1.5, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>{selectedArtist.bio}</p>
+
+<div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 16 }}>
+
+<button onClick={() => { playTrack(topTracks[0]); setQueue(topTracks.slice(1).map(t => t.id)); }}
+
+style={{ padding: "10px 28px", borderRadius: 24, background: selectedArtist.color, border: "none", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+
+<Icon name="play" size={16} /> Play
+
+</button>
+
+<button style={{ padding: "10px 20px", borderRadius: 24, background: "transparent", border: `1px solid ${theme.textSecondary}`, color: theme.text, fontSize: 13, cursor: "pointer", fontWeight: 500 }}>
+
+Follow
+
+</button>
+
+</div>
+
+</div>
+
+{/* Popular */}
+
+<SectionHeader title="Popular" />
+
+<div style={{ padding: "0 16px" }}>
+
+{topTracks.map((track, i) => <TrackRow key={track.id} track={track} index={i} />)}
+
+</div>
+
+<div style={{ height: 24 }} />
+
+{/* Discography */}
+
+<SectionHeader title="Discography" />
+
+<ScrollRow>
+
+{albums.map(album => (
+
+<div key={album.id} style={{ width: 140, flexShrink: 0 }}>
+
+<AlbumCard album={album} />
+
+</div>
+
+))}
+
+</ScrollRow>
+
+</div>
+
+);
+
+};
+
+// PLAYLIST PAGE
+
+const PlaylistPage = () => {
+
+if (!selectedPlaylist) return null;
+
+const pl = playlists.find(p => p.id === selectedPlaylist.id) || selectedPlaylist;
+
+const tracks = pl.tracks.map(id => TRACKS.find(t => t.id === id)).filter(Boolean);
+
+const totalDuration = tracks.reduce((s, t) => s + t.duration, 0);
+
+return (
+
+<div style={{ paddingBottom: 20 }}>
+
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 16px 28px", textAlign: "center" }}>
+
+<div style={{
+
+width: 160, height: 160, borderRadius: 12,
+
+background: `linear-gradient(135deg, ${pl.color}40, ${pl.color}15)`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 60, marginBottom: 16,
+
+boxShadow: `0 12px 40px ${pl.color}25`,
+
+}}>
+
+{pl.cover}
+
+</div>
+
+<div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.03em" }}>{pl.name}</div>
+
+{pl.description && <div style={{ color: theme.textSecondary, fontSize: 13, marginTop: 4 }}>{pl.description}</div>}
+
+<div style={{ color: theme.textSecondary, fontSize: 12, marginTop: 4 }}>{tracks.length} songs · {Math.floor(totalDuration / 60)} min</div>
+
+{tracks.length > 0 && (
+
+<div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+
+<button onClick={() => { playTrack(tracks[0]); setQueue(tracks.slice(1).map(t => t.id)); }}
+
+style={{ padding: "10px 28px", borderRadius: 24, background: theme.accent, border: "none", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+
+<Icon name="play" size={16} /> Play
+
+</button>
+
+<button onClick={() => { const s = [...tracks].sort(() => Math.random() - 0.5); playTrack(s[0]); setQueue(s.slice(1).map(t => t.id)); setShuffleOn(true); }}
+
+style={{ padding: "10px 20px", borderRadius: 24, background: theme.surfaceHover, border: "none", color: theme.text, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+
+<Icon name="shuffle" size={16} /> Shuffle
+
+</button>
+
+</div>
+
+)}
+
+</div>
+
+<div style={{ padding: "0 16px" }}>
+
+{tracks.length > 0 ? (
+
+tracks.map((track, i) => <TrackRow key={track.id} track={track} index={i} playlistId={pl.id} />)
+
+) : (
+
+<div style={{ textAlign: "center", padding: "40px 20px", color: theme.textSecondary }}>
+
+<div style={{ fontSize: 13 }}>This playlist is empty. Search for songs to add.</div>
+
+</div>
+
+)}
+
+</div>
+
+</div>
+
+);
+
+};
+
+// GENRE PAGE
+
+const GenrePage = () => {
+
+if (!selectedGenre) return null;
+
+const genreArtists = ARTISTS.filter(a => a.genre === selectedGenre.name);
+
+const genreTracks = TRACKS.filter(t => genreArtists.some(a => a.id === t.artistId));
+
+const genreAlbums = ALBUMS.filter(a => genreArtists.some(ar => ar.id === a.artist));
+
+return (
+
+<div style={{ paddingBottom: 20 }}>
+
+<div style={{
+
+padding: "30px 16px", textAlign: "center",
+
+background: `linear-gradient(180deg, ${selectedGenre.color}25, transparent)`,
+
+}}>
+
+<div style={{ fontSize: 48, marginBottom: 8 }}>{selectedGenre.icon}</div>
+
+<div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>{selectedGenre.name}</div>
+
+</div>
+
+{genreArtists.length > 0 && (
+
+<>
+
+<SectionHeader title="Artists" />
+
+<ScrollRow>
+
+{genreArtists.map(artist => (
+
+<div key={artist.id} style={{ width: 100, flexShrink: 0 }}>
+
+<ArtistCard artist={artist} />
+
+</div>
+
+))}
+
+</ScrollRow>
+
+<div style={{ height: 24 }} />
+
+</>
+
+)}
+
+{genreTracks.length > 0 && (
+
+<>
+
+<SectionHeader title="Popular Tracks" />
+
+<div style={{ padding: "0 16px" }}>
+
+{genreTracks.slice(0, 10).map((track, i) => <TrackRow key={track.id} track={track} index={i} />)}
+
+</div>
+
+<div style={{ height: 24 }} />
+
+</>
+
+)}
+
+{genreAlbums.length > 0 && (
+
+<>
+
+<SectionHeader title="Albums" />
+
+<GridRow>{genreAlbums.map(album => <AlbumCard key={album.id} album={album} />)}</GridRow>
+
+</>
+
+)}
+
+</div>
+
+);
+
+};
+
+// ─────────────────────────────────────────
+
+// FULL-SCREEN PLAYER
+
+// ─────────────────────────────────────────
+
+const FullPlayer = () => {
+
+if (!showFullPlayer || !currentTrack) return null;
+
+const album = ALBUMS.find(a => a.id === currentTrack.albumId);
+
+return (
+
+<div style={{
+
+position: "fixed", inset: 0, zIndex: 100,
+
+background: theme.bg,
+
+display: "flex", flexDirection: "column",
+
+animation: "slideUp 0.3s ease",
+
+}}>
+
+{/* Ambient glow */}
+
+<div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "60%", background: `radial-gradient(ellipse at center top, ${album?.color || theme.accent}20, transparent 70%)`, pointerEvents: "none" }} />
+
+{/* Top bar */}
+
+<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", position: "relative", zIndex: 1 }}>
+
+<button onClick={() => setShowFullPlayer(false)} style={{ background: "none", border: "none", color: theme.text, cursor: "pointer", padding: 4, display: "flex" }}>
+
+<Icon name="chevDown" size={24} />
+
+</button>
+
+<div style={{ fontSize: 11, color: theme.textSecondary, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>Now Playing</div>
+
+<button onClick={() => setShowQueue(!showQueue)} style={{ background: "none", border: "none", color: showQueue ? theme.accent : theme.textSecondary, cursor: "pointer", padding: 4, display: "flex" }}>
+
+<Icon name="queue" size={20} />
+
+</button>
+
+</div>
+
+{showQueue ? (
+
+/* Queue view */
+
+<div style={{ flex: 1, overflow: "auto", padding: "0 20px", position: "relative", zIndex: 1 }}>
+
+<div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Queue</div>
+
+<div style={{ fontSize: 11, color: theme.textSecondary, fontWeight: 600, marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase" }}>Now Playing</div>
+
+<TrackRow track={currentTrack} compact />
+
+{queue.length > 0 && (
+
+<>
+
+<div style={{ fontSize: 11, color: theme.textSecondary, fontWeight: 600, margin: "20px 0 8px", letterSpacing: "0.06em", textTransform: "uppercase" }}>Next Up</div>
+
+{queue.map((id, i) => {
+
+const t = TRACKS.find(tr => tr.id === id);
+
+return t ? <TrackRow key={`${id}-${i}`} track={t} index={i} compact /> : null;
+
+})}
+
+</>
+
+)}
+
+{queue.length === 0 && (
+
+<div style={{ textAlign: "center", padding: "30px 0", color: theme.textSecondary, fontSize: 13 }}>Queue is empty</div>
+
+)}
+
+</div>
+
+) : (
+
+/* Album art + info */
+
+<div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 30px", position: "relative", zIndex: 1 }}>
+
+<div style={{
+
+width: "min(280px, 75vw)", aspectRatio: "1", borderRadius: 16,
+
+background: `linear-gradient(135deg, ${album?.color || theme.accent}50, ${album?.color || theme.accent}15)`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 100,
+
+boxShadow: `0 20px 60px ${album?.color || theme.accent}30`,
+
+marginBottom: 32,
+
+}}>
+
+{album?.cover || "🎵"}
+
+</div>
+
+<div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+
+<div style={{ minWidth: 0 }}>
+
+<div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.03em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentTrack.title}</div>
+
+<div style={{ color: theme.textSecondary, fontSize: 14, marginTop: 4 }}>{currentTrack.artist}</div>
+
+</div>
+
+<button onClick={() => toggleLike(currentTrack.id)}
+
+style={{ background: "none", border: "none", cursor: "pointer", color: likedTracks.has(currentTrack.id) ? theme.pink : theme.textSecondary, padding: 8, display: "flex", flexShrink: 0 }}>
+
+<Icon name={likedTracks.has(currentTrack.id) ? "heartFill" : "heart"} size={24} />
+
+</button>
+
+</div>
+
+</div>
+
+)}
+
+{/* Controls */}
+
+<div style={{ padding: "0 24px 40px", position: "relative", zIndex: 1 }}>
+
+{/* Progress */}
+
+<ProgressBar value={progress} max={currentTrack.duration} onChange={setProgress} height={4} color={album?.color || theme.accent} />
+
+<div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+
+<span style={{ fontSize: 11, color: theme.textSecondary }}>{fmt(progress)}</span>
+
+<span style={{ fontSize: 11, color: theme.textSecondary }}>{fmt(currentTrack.duration)}</span>
+
+</div>
+
+{/* Buttons */}
+
+<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12, padding: "0 8px" }}>
+
+<button onClick={() => setShuffleOn(!shuffleOn)} style={{ background: "none", border: "none", color: shuffleOn ? theme.accent : theme.textSecondary, cursor: "pointer", padding: 8, display: "flex" }}>
+
+<Icon name="shuffle" size={20} />
+
+</button>
+
+<button onClick={handlePrev} style={{ background: "none", border: "none", color: theme.text, cursor: "pointer", padding: 8, display: "flex" }}>
+
+<Icon name="skipBack" size={28} />
+
+</button>
+
+<button onClick={togglePlay} style={{
+
+width: 60, height: 60, borderRadius: "50%", background: "#fff", border: "none",
+
+color: theme.bg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+
+}}>
+
+<Icon name={isPlaying ? "pause" : "play"} size={26} />
+
+</button>
+
+<button onClick={handleNext} style={{ background: "none", border: "none", color: theme.text, cursor: "pointer", padding: 8, display: "flex" }}>
+
+<Icon name="skipFwd" size={28} />
+
+</button>
+
+<button onClick={() => setRepeatMode(m => (m + 1) % 3)} style={{ background: "none", border: "none", color: repeatMode > 0 ? theme.accent : theme.textSecondary, cursor: "pointer", padding: 8, display: "flex", position: "relative" }}>
+
+<Icon name="repeat" size={20} />
+
+{repeatMode === 2 && <span style={{ position: "absolute", top: 2, right: 2, fontSize: 8, fontWeight: 800, color: theme.accent }}>1</span>}
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+);
+
+};
+
+// ─────────────────────────────────────────
+
+// MINI PLAYER (bottom bar)
+
+// ─────────────────────────────────────────
+
+const MiniPlayer = () => {
+
+if (!currentTrack) return null;
+
+const album = ALBUMS.find(a => a.id === currentTrack.albumId);
+
+return (
+
+<div style={css.player}>
+
+{/* Thin progress on top edge */}
+
+<div style={{ height: 2, background: theme.surfaceActive }}>
+
+<div style={{ height: "100%", background: album?.color || theme.accent, width: `${currentTrack.duration > 0 ? (progress / currentTrack.duration) * 100 : 0}%`, transition: "width 0.5s linear" }} />
+
+</div>
+
+<div onClick={() => setShowFullPlayer(true)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px 10px 12px", cursor: "pointer" }}>
+
+<div style={{
+
+width: 44, height: 44, borderRadius: 8, flexShrink: 0,
+
+background: `linear-gradient(135deg, ${album?.color || theme.accent}50, ${theme.surface})`,
+
+display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+
+}}>
+
+{album?.cover || "🎵"}
+
+</div>
+
+<div style={{ flex: 1, minWidth: 0 }}>
+
+<div style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentTrack.title}</div>
+
+<div style={{ fontSize: 11, color: theme.textSecondary, marginTop: 1 }}>{currentTrack.artist}</div>
+
+</div>
+
+<div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+
+<button onClick={e => { e.stopPropagation(); toggleLike(currentTrack.id); }}
+
+style={{ background: "none", border: "none", color: likedTracks.has(currentTrack.id) ? theme.pink : theme.textSecondary, cursor: "pointer", padding: 8, display: "flex" }}>
+
+<Icon name={likedTracks.has(currentTrack.id) ? "heartFill" : "heart"} size={18} />
+
+</button>
+
+<button onClick={e => { e.stopPropagation(); togglePlay(); }}
+
+style={{ background: "none", border: "none", color: theme.text, cursor: "pointer", padding: 8, display: "flex" }}>
+
+<Icon name={isPlaying ? "pause" : "play"} size={22} />
+
+</button>
+
+</div>
+
+</div>
+
+{/* Tab bar */}
+
+<div style={{
+
+display: "flex", justifyContent: "space-around", padding: "4px 0 12px",
+
+borderTop: `1px solid ${theme.border}`,
+
+}}>
+
+{[
+
+{ id: "home", icon: "home", label: "Home" },
+
+{ id: "search", icon: "search", label: "Search" },
+
+{ id: "library", icon: "library", label: "Library" },
+
+].map(item => (
+
+<button key={item.id} onClick={() => navTo(item.id)} style={{
+
+background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+
+color: page === item.id ? theme.accent : theme.textSecondary, padding: "6px 16px",
+
+}}>
+
+<Icon name={item.icon} size={20} />
+
+<span style={{ fontSize: 10, fontWeight: 500 }}>{item.label}</span>
+
+</button>
+
+))}
+
+</div>
+
+</div>
+
+);
+
+};
+
+// Tab bar when no track playing
+
+const TabBar = () => {
+
+if (currentTrack) return null;
+
+return (
+
+<div style={{
+
+position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 40,
+
+background: `${theme.surface}f0`, backdropFilter: "blur(20px)",
+
+borderTop: `1px solid ${theme.border}`,
+
+display: "flex", justifyContent: "space-around", padding: "8px 0 16px",
+
+}}>
+
+{[
+
+{ id: "home", icon: "home", label: "Home" },
+
+{ id: "search", icon: "search", label: "Search" },
+
+{ id: "library", icon: "library", label: "Library" },
+
+].map(item => (
+
+<button key={item.id} onClick={() => navTo(item.id)} style={{
+
+background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+
+color: page === item.id ? theme.accent : theme.textSecondary, padding: "6px 16px",
+
+}}>
+
+<Icon name={item.icon} size={22} />
+
+<span style={{ fontSize: 10, fontWeight: 500 }}>{item.label}</span>
+
+</button>
+
+))}
+
+</div>
+
+);
+
+};
+
+// ─────────────────────────────────────────
+
+// RENDER
+
+// ─────────────────────────────────────────
+
+return (
+
+<div style={css.app}>
+
+<style>{`
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+::-webkit-scrollbar { display: none; }
+
+body { margin: 0; background: #08080D; }
+
+@keyframes slideUp {
+
+from { transform: translateY(100%); }
+
+to { transform: translateY(0); }
+
+}
+
+button:active { opacity: 0.7; }
+
+div[style*="play-btn"]:hover { opacity: 1 !important; }
+
+`}</style>
+
+<Sidebar />
+
+<TopBar />
+
+<div style={css.main}>
+
+{page === "home" && <HomePage />}
+
+{page === "search" && <SearchPage />}
+
+{page === "library" && <LibraryPage />}
+
+{page === "album" && <AlbumPage />}
+
+{page === "artist" && <ArtistPage />}
+
+{page === "playlist" && <PlaylistPage />}
+
+{page === "genre" && <GenrePage />}
+
+</div>
+
+<MiniPlayer />
+
+<TabBar />
+
+<FullPlayer />
+
+<ContextMenuEl />
+
+<AddToPlaylistModal />
+
+<NewPlaylistModal />
+
+</div>
+
+);
+
+}

@@ -1,0 +1,126 @@
+/* Social page scoped effects (prefix: soc-) — keyframes that can't live in
+   tailwind.config.js / index.css (out of scope for this agent). */
+
+/* hero dot-grid pop-in */
+@keyframes soc-pop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.soc-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: soc-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* hero room dot sonar ping */
+@keyframes soc-ping {
+  0% { transform: scale(0.4); opacity: 0.9; }
+  70%, 100% { transform: scale(2.6); opacity: 0; }
+}
+.soc-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: soc-ping 1.6s ease-out infinite;
+}
+
+/* traveling bright segment along hero arcs (pathLength normalized to 100) */
+@keyframes soc-arc-travel {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -100; }
+}
+.soc-arc-travel {
+  stroke-dasharray: 6 94;
+  animation: soc-arc-travel 4s linear infinite;
+}
+
+/* metronome pulse dot (sync engine) */
+@keyframes soc-beat {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.18); opacity: 0.72; }
+}
+.soc-beat-dot {
+  animation: soc-beat 1.2s ease-in-out infinite;
+}
+@keyframes soc-beat-ring {
+  0% { transform: scale(0.5); opacity: 0.85; }
+  60%, 100% { transform: scale(1.9); opacity: 0; }
+}
+.soc-beat-ring {
+  animation: soc-beat-ring 1.2s ease-out infinite;
+}
+
+/* master beat line flash + 8th-beat aurora row flash */
+@keyframes soc-master {
+  0%, 100% { opacity: 0.15; }
+  8% { opacity: 1; }
+  30% { opacity: 0.15; }
+}
+.soc-master {
+  animation: soc-master 1.2s linear infinite;
+}
+@keyframes soc-rowflash {
+  0%, 88%, 100% { opacity: 0; }
+  92% { opacity: 0.5; }
+}
+.soc-rowflash {
+  animation: soc-rowflash 9.6s linear infinite;
+}
+
+/* breathing ambient glow behind artwork */
+@keyframes soc-breathe {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.12); }
+}
+.soc-breathe {
+  animation: soc-breathe 4s ease-in-out infinite;
+}
+
+/* taste orb drift (±12px, 7s, offset phases) */
+@keyframes soc-drift-a {
+  0%, 100% { transform: translate(-10px, -6px); }
+  50% { transform: translate(12px, 8px); }
+}
+@keyframes soc-drift-b {
+  0%, 100% { transform: translate(10px, 8px); }
+  50% { transform: translate(-12px, -7px); }
+}
+.soc-drift-a { animation: soc-drift-a 7s ease-in-out infinite; }
+.soc-drift-b { animation: soc-drift-b 7s ease-in-out infinite; }
+
+/* blend pick shimmer sweep */
+@keyframes soc-shimmer {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(320%); }
+}
+.soc-shimmer {
+  animation: soc-shimmer 1.4s cubic-bezier(0.16, 1, 0.3, 1) 1 both;
+}
+
+/* ✗ item subtle shake on enter */
+@keyframes soc-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+}
+.soc-shake {
+  animation: soc-shake 0.3s ease-in-out 2;
+}
+
+/* idle bob */
+@keyframes soc-bob {
+  0%, 100% { transform: translateY(-4px); }
+  50% { transform: translateY(4px); }
+}
+.soc-bob {
+  animation: soc-bob 3.2s ease-in-out infinite;
+}
+
+/* toast progress hairline */
+@keyframes soc-toastbar {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.soc-toastbar {
+  animation: soc-toastbar 3.5s linear both;
+  transform-origin: left;
+}

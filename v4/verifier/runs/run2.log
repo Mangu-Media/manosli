@@ -1,0 +1,15 @@
+=== run v2 2026-07-21T07:21:11+08:00 ===
+PASS build
+PASS routes(8)
+PASS content:federated
+PASS content:on-device
+PASS content:IPFS
+PASS content:E2EE
+PASS content:spatial
+PASS content:co-curation
+PASS brand
+PASS comp:Navbar
+PASS comp:Footer
+PASS comp:Layout
+PASS assets(26)
+exit=0

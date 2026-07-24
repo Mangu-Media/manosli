@@ -1,0 +1,33 @@
+{
+  "name": "manosli+",
+  "short_name": "manosli+",
+  "description": "manosli+ — the next-generation music platform. On-device intelligence, zero-knowledge privacy, spatial audio, and co-listening in perfect sync.",
+  "id": "/app",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#06030B",
+  "theme_color": "#7C5CFF",
+  "categories": ["music", "entertainment"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

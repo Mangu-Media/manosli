@@ -1,0 +1,10 @@
+=== run v4 2026-07-21T12:38:44+08:00 ===
+v2 exit=0
+v3 exit=0
+FAIL seam
+FAIL localStorage
+FAIL manifest
+FAIL manifest-link
+FAIL sw
+FAIL mediasession
+v4 exit=1

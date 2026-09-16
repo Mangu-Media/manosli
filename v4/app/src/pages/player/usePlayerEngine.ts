@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { Track } from './data';
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 // REAL AUDIO ENGINE
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 // Wraps a single HTMLAudioElement. Progress is derived from the element's
 // `timeupdate` events; track end is signaled through the `ended` event.
 // All controls (play/pause/seek/volume/mute) drive the element directly.
@@ -21,10 +21,21 @@ export interface PlayerEngine {
   seek: (seconds: number) => void;
   setVolume: (volume: number) => void;
   setMuted: (muted: boolean) => void;
+  /** Simulate spatial / binaural width with Web Audio (panner + Haas delay). */
+  setSpatial: (enabled: boolean) => void;
 }
 
 export function usePlayerEngine(callbacks: PlayerEngineCallbacks): PlayerEngine {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const spatialRef = useRef<{
+    ctx: AudioContext;
+    source: MediaElementAudioSourceNode;
+    panner: StereoPannerNode;
+    delay: DelayNode;
+    wet: GainNode;
+    dry: GainNode;
+    enabled: boolean;
+  } | null>(null);
   // Always call the latest callbacks (they close over changing player state).
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
@@ -32,6 +43,7 @@ export function usePlayerEngine(callbacks: PlayerEngineCallbacks): PlayerEngine 
   useEffect(() => {
     const audio = new Audio();
     audio.preload = 'auto';
+    audio.crossOrigin = 'anonymous';
     audioRef.current = audio;
 
     const handleTimeUpdate = () => {
@@ -55,6 +67,10 @@ export function usePlayerEngine(callbacks: PlayerEngineCallbacks): PlayerEngine 
       audio.pause();
       audio.removeAttribute('src');
       audioRef.current = null;
+      if (spatialRef.current) {
+        spatialRef.current.ctx.close().catch(() => {});
+        spatialRef.current = null;
+      }
     };
   }, []);
 
@@ -98,12 +114,52 @@ export function usePlayerEngine(callbacks: PlayerEngineCallbacks): PlayerEngine 
     if (audio) audio.muted = muted;
   }, []);
 
-  return { loadTrack, play, pause, seek, setVolume, setMuted };
+  const setSpatial = useCallback((enabled: boolean) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const ensureGraph = () => {
+      if (spatialRef.current) return spatialRef.current;
+      const AudioCtx = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return null;
+      const ctx = new AudioCtx();
+      const source = ctx.createMediaElementSource(audio);
+      const dry = ctx.createGain();
+      const wet = ctx.createGain();
+      const panner = ctx.createStereoPanner();
+      const delay = ctx.createDelay();
+      delay.delayTime.value = 0.018;
+      panner.pan.value = 0.35;
+      dry.gain.value = 1;
+      wet.gain.value = 0;
+      source.connect(dry);
+      dry.connect(ctx.destination);
+      source.connect(delay);
+      delay.connect(panner);
+      panner.connect(wet);
+      wet.connect(ctx.destination);
+      const graph = { ctx, source, panner, delay, wet, dry, enabled: false };
+      spatialRef.current = graph;
+      return graph;
+    };
+
+    const graph = ensureGraph();
+    if (!graph) return;
+    if (graph.ctx.state === 'suspended') {
+      graph.ctx.resume().catch(() => {});
+    }
+    graph.enabled = enabled;
+    graph.wet.gain.setTargetAtTime(enabled ? 0.55 : 0, graph.ctx.currentTime, 0.05);
+    graph.dry.gain.setTargetAtTime(enabled ? 0.75 : 1, graph.ctx.currentTime, 0.05);
+    graph.panner.pan.setTargetAtTime(enabled ? 0.42 : 0, graph.ctx.currentTime, 0.08);
+  }, []);
+
+  return { loadTrack, play, pause, seek, setVolume, setMuted, setSpatial };
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 // MEDIA SESSION (lockscreen / OS media controls)
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 
 export interface MediaSessionHandlers {
   play: () => void;

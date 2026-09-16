@@ -1,8 +1,8 @@
 import type { ReactElement, SVGProps } from 'react';
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 // ICONS — hand-crafted SVG icons
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 
 export interface IconProps {
   name: string;
@@ -50,6 +50,9 @@ export function Icon({ name, size = 20, className = '' }: IconProps): ReactEleme
     back: <svg {...s} viewBox="0 0 24 24" className={className}><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12,19 5,12 12,5" /></svg>,
     upload: <svg {...s} viewBox="0 0 24 24" className={className}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>,
     more:<svg {...s} viewBox="0 0 24 24" className={className}><circle cx="12" cy="12" r="1" fill="currentColor" /><circle cx="19" cy="12" r="1" fill="currentColor" /><circle cx="5" cy="12" r="1" fill="currentColor" /></svg>,
+    radio: <svg {...s} viewBox="0 0 24 24" className={className}><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V4l10 2" /><circle cx="9" cy="14" r="2" /><path d="M14 12h4M14 16h4" /></svg>,
+    rooms: <svg {...s} viewBox="0 0 24 24" className={className}><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>,
+    spatial: <svg {...s} viewBox="0 0 24 24" className={className}><circle cx="12" cy="12" r="3" /><path d="M5 12a7 7 0 0114 0M2 12a10 10 0 0120 0" /></svg>,
   };
 
   return icons[name] || null;

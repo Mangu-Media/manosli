@@ -67,6 +67,9 @@ Work packages:
   royalty transparency panel ($0.004/stream rate card, per-track math, payout stub, ledger.json
   license provenance). Synthetic stats are seeded + demo-labeled. Verifiers v2–v9 green.
   Rung-6 indie-moat seed planted.
+- 2026-09-16 — LAUNCH PACK: spatial audio (Web Audio), Radio + Rooms in /app,
+  product README at repo root, package renamed to manosli@0.5.0. Ready to
+  push and demo. Real-time rooms + licensed catalog still post-launch.
 - 2026-07-22 — ARTIST PUBLIC PROFILES SHIPPED (/artist/:id, version 4e38269): hero w/ aurora
   wash, top tracks (playable preview), discography grid, long bios (all 14 artists), follow
   (persisted, optimistic follower count), support pledges ($2/$5/$10/custom, stubbed checkout,

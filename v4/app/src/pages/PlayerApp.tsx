@@ -12,6 +12,8 @@ import {
   clamp,
 } from './player/data';
 import type { Artist, Album, Track, Genre, Playlist } from './player/data';
+import { RADIO_STATIONS, LISTENING_ROOMS } from './player/stations';
+import type { RadioStation, ListeningRoom } from './player/stations';
 import { usePlayerEngine, useMediaSession } from './player/usePlayerEngine';
 import { createPlayerRepository, ApiRepository, reportHistoryEvent } from './player/repository';
 import { computeListeningStats, PLAY_EVENTS_CAP } from './player/analytics';
@@ -52,7 +54,7 @@ import {
 // TYPES
 // ─────────────────────────────────────────────
 
-type Page = 'home' | 'search' | 'library' | 'stats' | 'album' | 'artist' | 'playlist' | 'genre';
+type Page = 'home' | 'search' | 'radio' | 'rooms' | 'library' | 'stats' | 'album' | 'artist' | 'playlist' | 'genre';
 
 interface PageStackEntry {
   page: Page;
@@ -95,6 +97,7 @@ export default function PlayerApp() {
   const [muted, setMuted] = useState(false);
   const [shuffleOn, setShuffleOn] = useState(false);
   const [repeatMode, setRepeatMode] = useState(0); // 0=off, 1=all, 2=one
+  const [spatialOn, setSpatialOn] = useState(() => localStorage.getItem('manosli.spatial') === '1');
   const [showQueue, setShowQueue] = useState(false);
   const [showFullPlayer, setShowFullPlayer] = useState(false);
 
@@ -181,6 +184,11 @@ export default function PlayerApp() {
   useEffect(() => {
     engine.setMuted(muted);
   }, [engine, muted]);
+
+  useEffect(() => {
+    engine.setSpatial(spatialOn);
+    localStorage.setItem('manosli.spatial', spatialOn ? '1' : '0');
+  }, [engine, spatialOn]);
 
   // ─────────────────────────────────────────
   // PERSISTENCE — write durable state through the repository (debounced).
@@ -1300,6 +1308,8 @@ export default function PlayerApp() {
           {[
             { id: 'home' as Page, icon: 'home', label: 'Home' },
             { id: 'search' as Page, icon: 'search', label: 'Search' },
+            { id: 'radio' as Page, icon: 'radio', label: 'Radio' },
+            { id: 'rooms' as Page, icon: 'rooms', label: 'Rooms' },
             { id: 'library' as Page, icon: 'library', label: 'Your Library' },
             { id: 'stats' as Page, icon: 'trending', label: 'Your Sound' },
           ].map((item) => (
@@ -1658,6 +1668,8 @@ export default function PlayerApp() {
               )}
               {page === 'library' && 'Your Library'}
               {page === 'stats' && 'Your Sound'}
+              {page === 'radio' && 'Radio'}
+              {page === 'rooms' && 'Rooms'}
               {page === 'album' && selectedAlbum?.title}
               {page === 'artist' && selectedArtist?.name}
               {page === 'playlist' && selectedPlaylist?.name}
@@ -2651,6 +2663,118 @@ export default function PlayerApp() {
     );
   };
 
+  const startCollection = useCallback(
+    (trackIds: string[]) => {
+      const tracks = trackIds
+        .map((id) => allTracks.find((track) => track.id === id))
+        .filter((track): track is Track => Boolean(track));
+      if (tracks.length === 0) return;
+      playTrack(tracks[0]);
+      setQueue(tracks.slice(1).map((track) => track.id));
+    },
+    [allTracks, playTrack],
+  );
+
+  const RadioPage = () => (
+    <div style={{ paddingBottom: 20 }}>
+      <SectionHead title="Radio" />
+      <div style={{ padding: '0 16px', display: 'grid', gap: 12 }}>
+        {RADIO_STATIONS.map((station: RadioStation) => (
+          <button
+            key={station.id}
+            onClick={() => startCollection(station.trackIds)}
+            style={{
+              width: '100%',
+              textAlign: 'left',
+              background: theme.surface,
+              border: `1px solid ${theme.border}`,
+              color: theme.text,
+              borderRadius: 12,
+              padding: '14px 14px 12px',
+              cursor: 'pointer',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 10,
+                  background: `${station.color}22`,
+                  border: `1px solid ${station.color}66`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                  flexShrink: 0,
+                }}
+              >
+                {station.cover}
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{station.name}</div>
+                <div style={{ marginTop: 2, fontSize: 12, color: theme.textSecondary }}>{station.tagline}</div>
+                <div style={{ marginTop: 5, fontSize: 11, color: theme.dim }}>{station.trackIds.length} tracks queued</div>
+              </div>
+              <Icon name="play" size={16} />
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const RoomsPage = () => (
+    <div style={{ paddingBottom: 20 }}>
+      <SectionHead title="Rooms" />
+      <div style={{ padding: '0 16px', display: 'grid', gap: 12 }}>
+        {LISTENING_ROOMS.map((room: ListeningRoom) => (
+          <button
+            key={room.id}
+            onClick={() => startCollection(room.trackIds)}
+            style={{
+              width: '100%',
+              textAlign: 'left',
+              background: theme.surface,
+              border: `1px solid ${theme.border}`,
+              color: theme.text,
+              borderRadius: 12,
+              padding: '14px 14px 12px',
+              cursor: 'pointer',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 10,
+                  background: `${room.color}22`,
+                  border: `1px solid ${room.color}66`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                  flexShrink: 0,
+                }}
+              >
+                {room.cover}
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{room.name}</div>
+                <div style={{ marginTop: 2, fontSize: 12, color: theme.textSecondary }}>
+                  Host: {room.host} · {room.listeners} listening
+                </div>
+                <div style={{ marginTop: 5, fontSize: 11, color: theme.dim }}>{room.vibe}</div>
+              </div>
+              <Icon name="play" size={16} />
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   // ─────────────────────────────────────────
   // FULL-SCREEN PLAYER
   // ─────────────────────────────────────────
@@ -2836,6 +2960,23 @@ export default function PlayerApp() {
             >
               <Icon name={muted || volume === 0 ? 'volumeMute' : 'volume'} size={18} />
             </button>
+            <button
+              onClick={() => setSpatialOn((on) => !on)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: spatialOn ? theme.accent : theme.textSecondary,
+                cursor: 'pointer',
+                padding: 4,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                flexShrink: 0,
+              }}
+            >
+              <Icon name="spatial" size={18} />
+              <span style={{ fontSize: 10, fontWeight: 700 }}>3D</span>
+            </button>
             <ProgressBar
               value={muted ? 0 : volume}
               max={1}
@@ -2917,6 +3058,8 @@ export default function PlayerApp() {
           {[
             { id: 'home' as Page, icon: 'home', label: 'Home' },
             { id: 'search' as Page, icon: 'search', label: 'Search' },
+            { id: 'radio' as Page, icon: 'radio', label: 'Radio' },
+            { id: 'rooms' as Page, icon: 'rooms', label: 'Rooms' },
             { id: 'library' as Page, icon: 'library', label: 'Library' },
           ].map((item) => (
             <button
@@ -2965,6 +3108,8 @@ export default function PlayerApp() {
         {[
           { id: 'home' as Page, icon: 'home', label: 'Home' },
           { id: 'search' as Page, icon: 'search', label: 'Search' },
+          { id: 'radio' as Page, icon: 'radio', label: 'Radio' },
+          { id: 'rooms' as Page, icon: 'rooms', label: 'Rooms' },
           { id: 'library' as Page, icon: 'library', label: 'Library' },
         ].map((item) => (
           <button
@@ -3012,6 +3157,8 @@ export default function PlayerApp() {
         {page === 'home' && <HomePage />}
         {page === 'search' && <SearchPage />}
         {page === 'library' && <LibraryPage />}
+        {page === 'radio' && <RadioPage />}
+        {page === 'rooms' && <RoomsPage />}
         {page === 'stats' && <YourSoundPage />}
         {page === 'album' && <AlbumPage />}
         {page === 'artist' && <ArtistPage />}
